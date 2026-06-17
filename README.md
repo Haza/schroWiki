@@ -1,6 +1,6 @@
 # SchroWiki
 
-Un wiki personnel ultra-rapide en fichier HTML unique. Conçu pour remplacer les wikis d'entreprise lents (DokuWiki, Confluence...) pour un usage quotidien : stocker des credentials, des liens internes, des notes de serveurs, des procédures.
+Un wiki personnel ultra-rapide en fichier HTML unique. Conçu pour remplacer les wikis d'entreprise lents (DokuWiki, Confluence...) pour un usage quotidien : stocker des liens internes, des notes, des procédures, des idées.
 
 Zéro installation, zéro dépendance locale. Un seul fichier HTML à ouvrir ou déposer sur un serveur PHP.
 
