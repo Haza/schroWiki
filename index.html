@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wiki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+  :root {
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    /* Theme par defaut : obsidian (sombre) */
+    --bg: #141414; --bg2: #1c1c1e; --bg3: #262628; --bg4: #313133;
+    --border: #3a3a3e; --border2: #5a5a60;
+    --text: #f5f5f7; --text2: #d0d0d8; --text3: #9898a6;
+    --accent: #a78bfa; --accent2: #c4b5fd;
+    --accent-bg: rgba(167,139,250,0.1); --accent-light: rgba(167,139,250,0.18);
+    --green: #4ade80; --amber: #fbbf24; --red: #f87171;
+  }
+  /* ── Obsidian (sombre violet) ── */
+  [data-theme="obsidian"] {
+    --bg: #141414; --bg2: #1c1c1e; --bg3: #262628; --bg4: #313133;
+    --border: #3a3a3e; --border2: #5a5a60;
+    --text: #f5f5f7; --text2: #d0d0d8; --text3: #9898a6;
+    --accent: #a78bfa; --accent2: #c4b5fd;
+    --accent-bg: rgba(167,139,250,0.1); --accent-light: rgba(167,139,250,0.18);
+    --green: #4ade80; --amber: #fbbf24; --red: #f87171;
+  }
+  /* ── Midnight (sombre bleu) ── */
+  [data-theme="midnight"] {
+    --bg: #0d1117; --bg2: #161b22; --bg3: #1f2937; --bg4: #273344;
+    --border: #30363d; --border2: #4a5568;
+    --text: #e6edf3; --text2: #c9d1d9; --text3: #7d8590;
+    --accent: #58a6ff; --accent2: #79b8ff;
+    --accent-bg: rgba(88,166,255,0.1); --accent-light: rgba(88,166,255,0.18);
+    --green: #3fb950; --amber: #d29922; --red: #f85149;
+  }
+  /* ── Forest (sombre vert) ── */
+  [data-theme="forest"] {
+    --bg: #0d1512; --bg2: #131f1a; --bg3: #1a2b23; --bg4: #22362d;
+    --border: #2d4438; --border2: #3d6050;
+    --text: #e8f0eb; --text2: #c5d8ca; --text3: #7a9e87;
+    --accent: #4ade80; --accent2: #86efac;
+    --accent-bg: rgba(74,222,128,0.1); --accent-light: rgba(74,222,128,0.18);
+    --green: #4ade80; --amber: #fbbf24; --red: #f87171;
+  }
+  /* ── Mocha (sombre chaud) ── */
+  [data-theme="mocha"] {
+    --bg: #181410; --bg2: #221e19; --bg3: #2e2720; --bg4: #3a3028;
+    --border: #46392e; --border2: #6b5544;
+    --text: #f2ede8; --text2: #d8cec4; --text3: #9c8472;
+    --accent: #e8a87c; --accent2: #f0c4a0;
+    --accent-bg: rgba(232,168,124,0.1); --accent-light: rgba(232,168,124,0.18);
+    --green: #a8cc8c; --amber: #fbbf24; --red: #f87171;
+  }
+  /* ── Linen (clair creme) ── */
+  [data-theme="linen"] {
+    --bg: #f5f0e8; --bg2: #fefcf8; --bg3: #ede8de; --bg4: #e0d9cc;
+    --border: #ccc4b4; --border2: #a09080;
+    --text: #1a1512; --text2: #3d342a; --text3: #7a6e62;
+    --accent: #7c5c2e; --accent2: #5a3e1a;
+    --accent-bg: rgba(124,92,46,0.08); --accent-light: rgba(124,92,46,0.15);
+    --green: #3a7a3a; --amber: #b45309; --red: #cc2222;
+  }
+  /* ── Arctic (clair bleu-gris) ── */
+  [data-theme="arctic"] {
+    --bg: #eef2f7; --bg2: #ffffff; --bg3: #e2e8f0; --bg4: #d4dce8;
+    --border: #c0cad8; --border2: #8896aa;
+    --text: #0f172a; --text2: #1e3a5f; --text3: #5a7090;
+    --accent: #2563eb; --accent2: #1d4ed8;
+    --accent-bg: rgba(37,99,235,0.08); --accent-light: rgba(37,99,235,0.15);
+    --green: #16a34a; --amber: #b45309; --red: #dc2626;
+  }
+  * { transition: background-color 0.2s, border-color 0.2s, color 0.15s; }
+  #content-editor { transition: none; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.5; overflow: hidden; }
+
+  /* Layout */
+  #app { display: grid; grid-template-columns: 300px 1fr; grid-template-rows: 52px 1fr; height: 100vh; }
+  #topbar { grid-column: 1/-1; background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; padding: 0 16px; }
+  #sidebar { background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  #main { display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Topbar */
+  .logo { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--accent2); letter-spacing: 0.05em; white-space: nowrap; }
+  .logo span { color: var(--text3); }
+  #search-wrap { flex: 1; max-width: 400px; position: relative; }
+  #search { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px 7px 32px; color: var(--text); font-size: 14px; outline: none; transition: border 0.15s; font-family: var(--sans); }
+  #search:focus { border-color: var(--accent); }
+  #search::placeholder { color: var(--text3); }
+  .search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 12px; pointer-events: none; }
+  #search-count { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .topbar-btn { background: var(--accent-bg); border: 1px solid var(--accent); color: var(--accent2); padding: 6px 13px; border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; white-space: nowrap; font-family: var(--sans); }
+  .topbar-btn:hover { background: var(--accent); color: white; }
+  .topbar-btn.ghost { background: transparent; color: var(--text2); border-color: var(--border); }
+  .topbar-btn.ghost:hover { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+  #autosave-status { font-size: 11px; color: var(--text3); white-space: nowrap; }
+  #db-status { font-size: 11px; color: var(--text3); cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  #db-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  #db-status .dot.warn { background: var(--amber); }
+
+  /* Sidebar header */
+  .sidebar-header { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+  .sidebar-header-title { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; flex: 1; }
+  #entry-count { font-size: 12px; color: var(--text3); background: var(--bg3); padding: 2px 7px; border-radius: 10px; }
+  .icon-btn { background: transparent; border: 1px solid transparent; color: var(--text3); width: 24px; height: 24px; border-radius: 5px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.1s; padding: 0; line-height: 1; flex-shrink: 0; }
+  .icon-btn:hover { background: var(--bg3); border-color: var(--border); color: var(--text2); }
+  #entry-list { flex: 1; overflow-y: auto; padding: 8px; }
+  #entry-list::-webkit-scrollbar { width: 4px; }
+  #entry-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Dossiers */
+  .folder-row { display: flex; align-items: center; gap: 6px; padding: 7px 8px; border-radius: 6px; cursor: pointer; margin-bottom: 2px; border: 1px solid transparent; user-select: none; }
+  .folder-row:hover { background: var(--bg3); }
+  .folder-row.folder-active { background: var(--accent-bg); border-color: var(--accent); }
+  .folder-chevron { font-size: 9px; color: var(--text3); transition: transform 0.15s; width: 12px; text-align: center; flex-shrink: 0; }
+  .folder-chevron.open { transform: rotate(90deg); }
+  .folder-icon { font-size: 13px; flex-shrink: 0; }
+  .folder-name { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .folder-row.folder-active .folder-name { color: var(--accent2); }
+  .folder-count { font-size: 11px; color: var(--text3); background: var(--bg4); padding: 1px 6px; border-radius: 8px; flex-shrink: 0; }
+  .folder-actions { display: none; gap: 2px; }
+  .folder-row:hover .folder-actions { display: flex; }
+  .folder-action-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 12px; padding: 2px 4px; border-radius: 3px; line-height: 1; }
+  .folder-action-btn:hover { color: var(--red); background: rgba(185,28,28,0.08); }
+
+  /* Zone fiches dans un dossier */
+  .folder-entries { padding-left: 14px; border-left: 1px solid var(--border); margin: 1px 0 3px 17px; }
+  .folder-entries.collapsed { display: none; }
+
+  /* Fiches sans dossier */
+  .no-folder-section { margin-top: 4px; }
+  .no-folder-label { font-size: 11px; color: var(--text3); padding: 6px 8px 3px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* Fiche individuelle */
+  .entry-item { padding: 8px 10px; border-radius: 6px; cursor: pointer; margin-bottom: 3px; border: 1px solid transparent; transition: all 0.1s; }
+  .entry-item.kbd-focus { background: var(--bg3); border-color: var(--border2); outline: none; }
+  .entry-item:hover { background: var(--bg3); border-color: var(--border); }
+  .entry-item.active { background: var(--accent-bg); border-color: var(--accent); }
+  .entry-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.4; }
+  .entry-item.active .entry-title { color: var(--accent2); }
+  .entry-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+  .tag { font-size: 11px; padding: 2px 5px; border-radius: 3px; background: var(--bg4); color: var(--text2); font-family: var(--mono); }
+  .entry-excerpt { font-size: 12px; color: var(--text3); margin-top: 4px; line-height: 1.5; font-style: italic; }
+  .entry-excerpt .highlight { font-style: normal; }
+  .no-results { padding: 20px 10px; text-align: center; color: var(--text3); font-size: 13px; }
+  .highlight { background: rgba(79,70,229,0.15); color: var(--accent2); border-radius: 2px; padding: 0 1px; font-weight: 600; }
+  mark.preview-hl { background: rgba(167,139,250,0.3); color: inherit; border-radius: 3px; padding: 1px 2px; font-weight: 600; outline: 1px solid rgba(167,139,250,0.5); }
+  [data-theme="linen"] mark.preview-hl, [data-theme="arctic"] mark.preview-hl { background: rgba(37,99,235,0.12); outline-color: rgba(37,99,235,0.35); }
+
+  /* Main toolbar */
+  #main-toolbar { padding: 8px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; background: var(--bg2); min-height: 50px; }
+  #entry-title-input { flex: 1; background: transparent; border: none; color: var(--text); font-size: 17px; font-weight: 600; outline: none; font-family: var(--sans); }
+  #entry-title-input::placeholder { color: var(--text3); }
+  .tb-btn { background: transparent; border: 1px solid var(--border); color: var(--text2); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.12s; display: flex; align-items: center; gap: 4px; white-space: nowrap; font-family: var(--sans); }
+  .tb-btn:hover { border-color: var(--border2); background: var(--bg3); color: var(--text); }
+  .tb-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent2); }
+  .tb-btn.danger { border-color: transparent; color: var(--text3); }
+  .tb-btn.danger:hover { border-color: var(--red); color: var(--red); background: rgba(185,28,28,0.07); }
+  .tb-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+  #save-indicator { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  #save-indicator.saved { color: var(--green); }
+  #save-indicator.unsaved { color: var(--amber); }
+
+  /* Barre dossier + tags */
+  #meta-bar { padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--bg2); display: flex; align-items: center; gap: 0; min-height: 38px; }
+  .meta-section { display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+  .meta-section + .meta-section { border-left: 1px solid var(--border); padding-left: 12px; margin-left: 10px; }
+  .meta-label { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  #folder-select { background: transparent; border: none; color: var(--text2); font-size: 13px; outline: none; cursor: pointer; max-width: 140px; font-family: var(--sans); color-scheme: dark; }
+  [data-theme="linen"] #folder-select, [data-theme="arctic"] #folder-select { color-scheme: light; }
+  #tags-display { display: flex; flex-wrap: wrap; gap: 3px; }
+  #tags-input { background: transparent; border: none; color: var(--text2); font-size: 13px; font-family: var(--mono); outline: none; min-width: 90px; }
+  #tags-input::placeholder { color: var(--text3); }
+  .tag-pill { font-size: 12px; padding: 2px 7px; border-radius: 4px; background: var(--bg4); border: 1px solid var(--border2); color: var(--text2); font-family: var(--mono); display: flex; align-items: center; gap: 4px; }
+  .tag-pill button { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 10px; padding: 0; line-height: 1; }
+  .tag-pill button:hover { color: var(--red); }
+
+  /* Editeur */
+  #editor-area { flex: 1; display: flex; overflow: hidden; }
+  #editor-pane, #preview-pane { flex: 1; overflow: auto; }
+  #editor-pane { border-right: 1px solid var(--border); }
+  #editor-pane::-webkit-scrollbar, #preview-pane::-webkit-scrollbar { width: 4px; }
+  #editor-pane::-webkit-scrollbar-thumb, #preview-pane::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  #content-editor { width: 100%; height: 100%; background: var(--bg2); border: none; color: var(--text); font-family: var(--mono); font-size: 14px; line-height: 1.75; padding: 22px 24px; outline: none; resize: none; }
+  #content-editor::placeholder { color: var(--text3); }
+
+  /* Preview */
+  #preview-content { padding: 22px 28px; line-height: 1.8; color: var(--text); font-size: 15px; }
+  #preview-content h1, #preview-content h2, #preview-content h3 { color: var(--text); font-weight: 600; margin: 1.4em 0 0.6em; }
+  #preview-content h1 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.4em; }
+  #preview-content h2 { font-size: 1.2em; }
+  #preview-content h3 { font-size: 1.05em; color: var(--text2); }
+  #preview-content p { margin: 0.6em 0; }
+  #preview-content a { color: var(--accent2); text-decoration: none; }
+  #preview-content a:hover { text-decoration: underline; }
+  #preview-content code { font-family: var(--mono); font-size: 13px; background: var(--bg3); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; color: var(--accent2); }
+  #preview-content pre { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 14px; overflow-x: auto; margin: 0.8em 0; }
+  #preview-content pre code { background: none; border: none; padding: 0; color: var(--text); }
+  #preview-content blockquote { border-left: 3px solid var(--accent); padding: 4px 14px; margin: 0.8em 0; color: var(--text2); background: var(--accent-bg); border-radius: 0 4px 4px 0; }
+  #preview-content ul, #preview-content ol { padding-left: 1.5em; margin: 0.5em 0; }
+  #preview-content li { margin: 0.2em 0; }
+  #preview-content table { border-collapse: collapse; width: 100%; margin: 0.8em 0; }
+  #preview-content th, #preview-content td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+  #preview-content th { background: var(--bg3); color: var(--text2); font-weight: 500; font-size: 13px; }
+  #preview-content hr { border: none; border-top: 1px solid var(--border); margin: 1.5em 0; }
+  #preview-content strong { color: var(--text); font-weight: 600; }
+  #preview-content em { color: var(--text2); }
+
+  /* Welcome */
+  #welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text3); gap: 12px; padding: 40px; }
+  #welcome h2 { font-size: 18px; color: var(--text2); font-weight: 500; }
+  #welcome p { font-size: 14px; text-align: center; line-height: 1.7; max-width: 360px; }
+  .kbd { background: var(--bg3); border: 1px solid var(--border2); border-radius: 4px; padding: 1px 6px; font-family: var(--mono); font-size: 11px; color: var(--text2); }
+
+  /* Modal */
+  #modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+  #modal-overlay.show { display: flex; }
+  #modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 22px; min-width: 360px; max-width: 480px; }
+  #md-modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; width: 760px; max-width: 95vw; max-height: 82vh; display: flex; flex-direction: column; }
+  #md-modal-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  #md-modal-header h3 { font-size: 16px; font-weight: 600; color: var(--text); }
+  #md-modal-close { background: transparent; border: none; color: var(--text3); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 5px; }
+  #md-modal-close:hover { background: var(--bg3); color: var(--text); }
+  #md-modal-body { overflow-y: auto; padding: 18px 22px; flex: 1; }
+  #md-modal-body::-webkit-scrollbar { width: 5px; }
+  #md-modal-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  .md-section { margin-bottom: 26px; }
+  .md-section-title { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .md-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+  .md-code { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-family: var(--mono); font-size: 12.5px; color: var(--text2); cursor: pointer; position: relative; white-space: pre; overflow: hidden; text-overflow: ellipsis; transition: border-color 0.15s, background 0.15s; }
+  .md-code:hover { border-color: var(--accent); background: var(--accent-bg); color: var(--text); }
+  .md-code:hover::after { content: 'Copier'; position: absolute; right: 7px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--accent2); font-family: var(--sans); }
+  .md-code.copied { border-color: var(--green); background: rgba(74,222,128,0.08); }
+  .md-code.copied::after { content: 'Copie !' !important; color: var(--green) !important; right: 7px; top: 50%; transform: translateY(-50%); font-size: 10px; position: absolute; font-family: var(--sans); }
+  .md-render { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 13px; color: var(--text); line-height: 1.5; }
+  .md-render code { font-family: var(--mono); font-size: 12px; background: var(--bg3); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--accent2); }
+  .md-render pre { background: var(--bg3); border: 1px solid var(--border); border-radius: 5px; padding: 8px 10px; font-family: var(--mono); font-size: 12px; color: var(--text2); margin: 2px 0; }
+  .md-render strong { font-weight: 700; }
+  .md-render em { font-style: italic; color: var(--text2); }
+  .md-render del { text-decoration: line-through; color: var(--text3); }
+  .md-render a { color: var(--accent2); text-decoration: underline; }
+  .md-render blockquote { border-left: 3px solid var(--accent); padding: 2px 10px; color: var(--text2); background: var(--accent-bg); border-radius: 0 4px 4px 0; font-style: italic; }
+  .md-render table { border-collapse: collapse; font-size: 12px; width: 100%; }
+  .md-render th, .md-render td { border: 1px solid var(--border); padding: 3px 7px; }
+  .md-render th { background: var(--bg3); font-weight: 600; }
+  .md-render ul, .md-render ol { padding-left: 1.2em; }
+  .md-render h1 { font-size: 1.3em; font-weight: 700; border-bottom: 1px solid var(--border); }
+  .md-render h2 { font-size: 1.15em; font-weight: 600; }
+  .md-render h3 { font-size: 1.05em; font-weight: 600; color: var(--text2); }
+  .md-label { font-size: 11px; color: var(--text3); margin-bottom: 3px; font-family: var(--sans); }
+  #modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 14px; color: var(--text); }
+  #modal p { font-size: 14px; color: var(--text2); margin-bottom: 18px; line-height: 1.6; }
+  #modal input[type=text] { width: 100%; border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; font-size: 14px; color: var(--text); background: var(--bg3); outline: none; margin-bottom: 18px; font-family: var(--sans); }
+  #modal input[type=text]:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .btn-primary { background: var(--accent); border: none; color: white; padding: 8px 16px; border-radius: 7px; cursor: pointer; font-size: 14px; font-family: var(--sans); }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-secondary { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 7px; cursor: pointer; font-size: 14px; font-family: var(--sans); }
+  .btn-secondary:hover { border-color: var(--border2); }
+  .btn-danger { background: rgba(185,28,28,0.08); border: 1px solid var(--red); color: var(--red); padding: 8px 16px; border-radius: 7px; cursor: pointer; font-size: 14px; font-family: var(--sans); }
+  .btn-danger:hover { background: var(--red); color: white; }
+
+  /* Toast */
+  /* Login */
+  #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: flex; align-items: center; justify-content: center; }
+  #login-box { background: var(--bg2); border: 1px solid var(--border2); border-radius: 14px; padding: 36px 40px; width: 340px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  #login-box .logo { font-size: 18px; text-align: center; margin-bottom: 4px; }
+  #login-box h2 { font-size: 15px; font-weight: 600; color: var(--text2); text-align: center; margin-top: -8px; }
+  .login-field { display: flex; flex-direction: column; gap: 5px; }
+  .login-field label { font-size: 12px; color: var(--text3); font-weight: 500; }
+  .login-field input { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 14px; color: var(--text); outline: none; font-family: var(--sans); transition: border 0.15s; }
+  .login-field input:focus { border-color: var(--accent); }
+  #login-submit { background: var(--accent); border: none; color: white; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--sans); transition: background 0.15s; margin-top: 4px; }
+  #login-submit:hover { background: var(--accent2); }
+  #login-error { font-size: 12px; color: var(--red); text-align: center; min-height: 16px; }
+  #login-remember { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text3); cursor: pointer; }
+  #login-remember input { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
+
+  #toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 9px; padding: 11px 16px; font-size: 14px; color: var(--text); z-index: 200; transform: translateY(60px); opacity: 0; transition: all 0.2s; pointer-events: none; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-color: var(--green); color: var(--green); }
+  #toast.error { border-color: var(--red); color: var(--red); }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="login-screen" style="display:none">
+  <div id="login-box">
+    <div class="logo">wiki<span>.</span>srv</div>
+    <h2>Connexion</h2>
+    <div class="login-field">
+      <label for="login-user">Identifiant</label>
+      <input type="text" id="login-user" autocomplete="username" spellcheck="false">
+    </div>
+    <div class="login-field">
+      <label for="login-pass">Mot de passe</label>
+      <input type="password" id="login-pass" autocomplete="current-password">
+    </div>
+    <label class="login-remember">
+      <input type="checkbox" id="login-remember" checked>
+      Se souvenir de moi
+    </label>
+    <div id="login-error"></div>
+    <button id="login-submit">Se connecter</button>
+  </div>
+</div>
+
+<div id="app">
+  <!-- Topbar -->
+  <div id="topbar">
+    <div class="logo">wiki<span>.</span>srv</div>
+    <div id="search-wrap">
+      <span class="search-icon">&#9906;</span>
+      <input id="search" type="text" placeholder="Rechercher... (titre, contenu, tags)" autocomplete="off" spellcheck="false">
+    </div>
+    <span id="search-count"></span>
+    <div style="flex:1"></div>
+    <select id="theme-select" title="Choisir un theme" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:0 8px;height:30px;border-radius:7px;cursor:pointer;font-size:12px;font-family:var(--sans);outline:none;transition:all 0.15s;">
+      <option value="obsidian">🌑 Obsidian</option>
+      <option value="midnight">🌙 Midnight</option>
+      <option value="forest">🌲 Forest</option>
+      <option value="mocha">☕ Mocha</option>
+      <option value="linen">📄 Linen</option>
+      <option value="arctic">❄️ Arctic</option>
+    </select>
+    <button id="btn-md-help" title="Aide Markdown" style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:0 11px;height:32px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px;transition:all 0.15s;white-space:nowrap;font-family:var(--sans);">&#10003; Aide MD</button>
+    <button class="topbar-btn ghost" id="btn-export" style="display:none">Exporter .db</button>
+    <label class="topbar-btn ghost" id="btn-import-label" style="display:none;cursor:pointer">
+      Importer .db
+      <input type="file" id="btn-import" accept=".db" style="display:none">
+    </label>
+    <button class="topbar-btn" id="btn-new">+ Nouvelle fiche</button>
+    <button id="btn-logout" style="display:none;background:transparent;border:1px solid var(--border);color:var(--text3);padding:0 10px;height:28px;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--sans);transition:all 0.15s;" title="Se deconnecter">Deconnexion</button>
+    <div id="db-status" style="font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px;">
+      <span class="dot" id="status-dot"></span>
+      <span id="status-text">Connecte</span>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-header-title">Dossiers</span>
+      <span id="entry-count">0</span>
+      <select id="sort-select" title="Ordre de tri" style="background:var(--bg3);border:1px solid var(--border);color:var(--text3);padding:0 4px;height:22px;border-radius:5px;font-size:10px;font-family:var(--sans);outline:none;cursor:pointer;max-width:80px;">
+        <option value="alpha">A → Z</option>
+        <option value="recent">Récent</option>
+      </select>
+      <button class="icon-btn" id="btn-new-folder" title="Nouveau dossier">&#43;</button>
+    </div>
+    <div id="entry-list"></div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+    <div id="welcome">
+      <div style="font-size:30px">&#128196;</div>
+      <h2>Wiki Local</h2>
+      <p>Selectionnez une fiche ou creez-en une nouvelle. Les dossiers permettent d'organiser vos fiches.</p>
+      <p style="font-size:12px">
+        <span class="kbd">Ctrl+N</span> nouvelle fiche &nbsp;
+        <span class="kbd">Ctrl+S</span> sauvegarder &nbsp;
+        <span class="kbd">/</span> rechercher
+      </p>
+    </div>
+    <div id="editor-wrap" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+      <div id="main-toolbar">
+        <input id="entry-title-input" type="text" placeholder="Titre de la fiche..." spellcheck="false">
+        <span id="save-indicator"></span>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" id="btn-mode-edit">&#9998; Edit</button>
+        <button class="tb-btn" id="btn-mode-split">&#8942; Split</button>
+        <button class="tb-btn" id="btn-mode-preview">&#128065; Preview</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" id="btn-save">&#10003; Sauvegarder</button>
+        <button class="tb-btn danger" id="btn-delete">&#10006;</button>
+      </div>
+      <div id="meta-bar">
+        <div class="meta-section">
+          <span class="meta-label">Dossier :</span>
+          <select id="folder-select"></select>
+        </div>
+        <div class="meta-section" style="flex:1">
+          <span class="meta-label">Tags :</span>
+          <div id="tags-display"></div>
+          <input id="tags-input" type="text" placeholder="tag... (Entree)" spellcheck="false">
+        </div>
+      </div>
+      <div id="editor-area">
+        <div id="editor-pane">
+          <textarea id="content-editor" placeholder="# Titre&#10;&#10;Contenu en Markdown..."></textarea>
+        </div>
+        <div id="preview-pane" style="display:none">
+          <div id="preview-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="md-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;align-items:center;justify-content:center;">
+  <div id="md-modal">
+    <div id="md-modal-header">
+      <h3>&#128196; Aide Markdown</h3>
+      <button id="md-modal-close">&#10005;</button>
+    </div>
+    <div id="md-modal-body"></div>
+  </div>
+</div>
+
+<div id="modal-overlay">
+  <div id="modal">
+    <h3 id="modal-title"></h3>
+    <p id="modal-body"></p>
+    <input type="text" id="modal-input" style="display:none">
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.min.js"></script>
+<script>
+(async () => {
+  let folders = [], entries = [];
+  let currentId = null, currentFolderId = null;
+  let saveTimer = null, viewMode = 'split', currentTags = [];
+  let collapsedFolders = new Set();
+  const COLLAPSE_KEY = 'wiki_collapsed';
+  const STORAGE_KEY  = 'wiki_local_db';
+  const SORT_KEY     = 'wiki_sort';
+  let currentSort    = localStorage.getItem('wiki_sort') || 'alpha';
+  let MODE = null; // 'server' | 'local'
+  let SQL = null, db = null;
+
+  try { const s = localStorage.getItem(COLLAPSE_KEY); if (s) collapsedFolders = new Set(JSON.parse(s)); } catch(e) {}
+
+  // ================================================================
+  // Detection du mode + gestion login
+  // ================================================================
+  async function detectMode() {
+    try {
+      const r = await fetch('api.php?action=check_auth', { method: 'GET', credentials: 'include' });
+      if (!r.ok) return 'local';
+      const d = await r.json();
+      if (d.error) return 'local';
+      return 'server'; // api.php existe, qu'on soit loggue ou non
+    } catch(e) {}
+    return 'local';
+  }
+
+  async function checkLogin() {
+    try {
+      const r = await fetch('api.php?action=check_auth', { credentials: 'include' });
+      const d = await r.json();
+      return d.logged === true;
+    } catch(e) { return false; }
+  }
+
+  async function doLogin(user, pass) {
+    const r = await fetch('api.php?action=login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ user, pass })
+    });
+    const d = await r.json();
+    if (d.ok) return true;
+    throw new Error(d.error || 'Erreur');
+  }
+
+  async function doLogout() {
+    await fetch('api.php?action=logout', { method: 'POST', credentials: 'include' });
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+
+  function showLoginScreen() {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    setTimeout(() => document.getElementById('login-user').focus(), 100);
+  }
+  function hideLoginScreen() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = '';
+  }
+
+  // Evenements login
+  async function submitLogin() {
+    const user  = document.getElementById('login-user').value.trim();
+    const pass  = document.getElementById('login-pass').value;
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = '';
+    if (!user || !pass) { errEl.textContent = 'Remplissez tous les champs.'; return; }
+    document.getElementById('login-submit').textContent = 'Connexion...';
+    try {
+      await doLogin(user, pass);
+      hideLoginScreen();
+      await loadAll();
+      showToast('Connecte', 'success');
+    } catch(e) {
+      errEl.textContent = 'Identifiants incorrects.';
+    } finally {
+      document.getElementById('login-submit').textContent = 'Se connecter';
+    }
+  }
+  document.getElementById('login-submit').addEventListener('click', submitLogin);
+  document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
+  document.getElementById('login-user').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-pass').focus(); });
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    await doLogout();
+    showToast('Deconnecte');
+  });
+
+  // ================================================================
+  // MODE SERVEUR - couche API PHP
+  // ================================================================
+  async function apiCall(action, body) {
+    try {
+      const res = await fetch(`api.php?action=${action}`, {
+        method: body ? 'POST' : 'GET',
+        headers: body ? { 'Content-Type': 'application/json' } : {},
+        credentials: 'include',
+        body: body ? JSON.stringify(body) : undefined
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      return data;
+    } catch(e) {
+      setStatus('warn');
+      showToast('Erreur API : ' + e.message, 'error');
+      throw e;
+    }
+  }
+
+  // ================================================================
+  // MODE LOCAL - couche SQLite WASM
+  // ================================================================
+  function localSaveToStorage() {
+    try {
+      const data = db.export();
+      const b64 = btoa(String.fromCharCode(...data));
+      localStorage.setItem(STORAGE_KEY, b64);
+      setStatus('saved');
+    } catch(e) { setStatus('warn'); }
+  }
+
+  function localInitDb(data) {
+    if (db) db.close();
+    db = data ? new SQL.Database(data) : new SQL.Database();
+    db.run(`CREATE TABLE IF NOT EXISTS folders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+    )`);
+    db.run(`CREATE TABLE IF NOT EXISTS entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      folder_id INTEGER,
+      title TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL DEFAULT '',
+      tags TEXT NOT NULL DEFAULT '',
+      created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+      updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+    )`);
+    localSaveToStorage();
+  }
+
+  async function localLoadAll() {
+    folders = []; entries = [];
+    try {
+      const rf = db.exec('SELECT id, name FROM folders ORDER BY name ASC');
+      if (rf.length && rf[0].values) folders = rf[0].values.map(r => ({ id: r[0], name: r[1] }));
+    } catch(e) {}
+    try {
+      const re = db.exec('SELECT id, folder_id, title, content, tags, updated_at FROM entries ORDER BY title ASC');
+      if (re.length && re[0].values) entries = re[0].values.map(r => ({
+        id: r[0], folder_id: r[1], title: r[2], content: r[3], tags: r[4], updated_at: r[5]
+      }));
+    } catch(e) {}
+  }
+
+  // ================================================================
+  // Interface unifiee - appellee par le reste de l'app
+  // ================================================================
+  let activeSearchQuery = '';
+
+  function sortEntries(list) {
+    if (currentSort === 'alpha') {
+      return [...list].sort((a, b) => (a.title || '').localeCompare(b.title || '', 'fr', { sensitivity: 'base' }));
+    } else {
+      return [...list].sort((a, b) => (b.updated_at || 0) - (a.updated_at || 0));
+    }
+  }
+
+  async function loadAll() {
+    try {
+      if (MODE === 'server') {
+        const data = await apiCall('load_all');
+        folders = data.folders;
+        entries = data.entries;
+      } else {
+        await localLoadAll();
+      }
+      entries = sortEntries(entries);
+      const q = document.getElementById('search').value;
+      if (q) doSearch(q); else renderSidebar(entries);
+      document.getElementById('entry-count').textContent = entries.length;
+      populateFolderSelect();
+      setStatus('saved');
+    } catch(e) {}
+  }
+
+  async function createFolder(name) {
+    if (!name.trim()) return;
+    if (MODE === 'server') {
+      await apiCall('create_folder', { name });
+    } else {
+      const stmt = db.prepare('INSERT INTO folders (name) VALUES (?)');
+      stmt.run([name.trim()]); stmt.free();
+      localSaveToStorage();
+    }
+    showToast('Dossier cree', 'success');
+    await loadAll();
+  }
+
+  async function renameFolder(id, name) {
+    if (!name.trim()) return;
+    if (MODE === 'server') {
+      await apiCall('rename_folder', { id, name });
+    } else {
+      const stmt = db.prepare('UPDATE folders SET name=? WHERE id=?');
+      stmt.run([name.trim(), id]); stmt.free();
+      localSaveToStorage();
+    }
+    await loadAll();
+  }
+
+  async function deleteFolder(id) {
+    if (MODE === 'server') {
+      await apiCall('delete_folder', { id });
+    } else {
+      db.run(`UPDATE entries SET folder_id=NULL WHERE folder_id=${id}`);
+      db.run(`DELETE FROM folders WHERE id=${id}`);
+      localSaveToStorage();
+    }
+    showToast('Dossier supprime');
+    await loadAll();
+  }
+
+  async function saveEntry() {
+    const title     = document.getElementById('entry-title-input').value.trim() || 'Sans titre';
+    const content   = document.getElementById('content-editor').value;
+    const tags      = currentTags.join(',');
+    const folder_id = currentFolderId || null;
+    const now       = Math.floor(Date.now() / 1000);
+    if (MODE === 'server') {
+      const res = await apiCall('save_entry', { id: currentId || 0, title, content, tags, folder_id });
+      if (!currentId) currentId = res.id;
+    } else {
+      if (currentId) {
+        const stmt = db.prepare('UPDATE entries SET folder_id=?, title=?, content=?, tags=?, updated_at=? WHERE id=?');
+        stmt.run([folder_id, title, content, tags, now, currentId]); stmt.free();
+      } else {
+        const stmt = db.prepare('INSERT INTO entries (folder_id, title, content, tags, created_at, updated_at) VALUES (?,?,?,?,?,?)');
+        stmt.run([folder_id, title, content, tags, now, now]); stmt.free();
+        currentId = db.exec('SELECT last_insert_rowid()')[0].values[0][0];
+      }
+      localSaveToStorage();
+    }
+    setSaveIndicator('saved');
+    showToast('Fiche sauvegardee', 'success');
+    await loadAll();
+    highlightActive();
+  }
+
+  async function deleteEntry(id) {
+    if (MODE === 'server') {
+      await apiCall('delete_entry', { id });
+    } else {
+      db.run(`DELETE FROM entries WHERE id=${id}`);
+      localSaveToStorage();
+    }
+    if (currentId === id) { currentId = null; showWelcome(); }
+    showToast('Fiche supprimee');
+    await loadAll();
+  }
+
+  // --- Recherche (JS pur en memoire) ---
+  function norm(s) {
+    return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  }
+  function doSearch(q) {
+    if (!q.trim()) { activeSearchQuery = ''; renderSidebar(entries); document.getElementById('search-count').textContent = ''; return; }
+    const lower = norm(q).trim();
+    activeSearchQuery = lower;
+    const keywords = lower.split(/\s+/).filter(Boolean);
+    const scored = entries.map(e => {
+      const tL = norm(e.title), taL = norm(e.tags), cL = norm(e.content);
+      let score = 0;
+      for (const kw of keywords) {
+        if (!tL.includes(kw) && !taL.includes(kw) && !cL.includes(kw)) return null;
+        if (tL.includes(kw)) score += 10;
+        if (taL.includes(kw)) score += 5;
+        if (cL.includes(kw)) score += 1;
+      }
+      return { ...e, score };
+    }).filter(Boolean).sort((a,b) => b.score - a.score);
+    const n = scored.length;
+    document.getElementById('search-count').textContent = n > 0 ? `${n} resultat${n>1?'s':''}` : 'Aucun resultat';
+    renderSidebar(scored, lower, true);
+  }
+
+  // --- Rendu sidebar ---
+  function renderSidebar(list, highlight, flat) {
+    const el = document.getElementById('entry-list');
+    if (!list.length && !folders.length) {
+      el.innerHTML = `<div class="no-results">${highlight ? 'Aucun resultat.' : 'Aucune fiche.'}</div>`;
+      return;
+    }
+    if (!list.length && flat) {
+      el.innerHTML = `<div class="no-results">Aucun resultat.</div>`;
+      return;
+    }
+    let html = '';
+    if (!flat) {
+      for (const f of folders) {
+        const fEntries = list.filter(e => e.folder_id === f.id);
+        const isOpen = !collapsedFolders.has(f.id);
+        html += `<div class="folder-row" data-fid="${f.id}">
+          <span class="folder-chevron${isOpen?' open':''}">&#9658;</span>
+          <span class="folder-icon">&#128193;</span>
+          <span class="folder-name">${escHtml(f.name)}</span>
+          <span class="folder-count">${fEntries.length}</span>
+          <span class="folder-actions">
+            <button class="folder-action-btn" data-action="rename" data-fid="${f.id}" title="Renommer">&#9998;</button>
+            <button class="folder-action-btn" data-action="delete" data-fid="${f.id}" title="Supprimer">&#10006;</button>
+          </span>
+        </div>`;
+        html += `<div class="folder-entries${isOpen?'':' collapsed'}" data-fentries="${f.id}">`;
+        if (fEntries.length) html += fEntries.map(e => entryHtml(e, highlight)).join('');
+        else html += `<div style="font-size:11px;color:var(--text3);padding:4px 6px;font-style:italic">Dossier vide</div>`;
+        html += `</div>`;
+      }
+      const orphans = list.filter(e => !e.folder_id);
+      if (orphans.length) {
+        if (folders.length) html += `<div class="no-folder-section"><div class="no-folder-label">Sans dossier</div>`;
+        html += orphans.map(e => entryHtml(e, highlight)).join('');
+        if (folders.length) html += `</div>`;
+      }
+    } else {
+      html = list.map(e => entryHtml(e, highlight)).join('');
+    }
+    el.innerHTML = html;
+    el.querySelectorAll('.folder-row').forEach(row => {
+      row.addEventListener('click', e => {
+        if (e.target.closest('.folder-action-btn')) return;
+        const fid = +row.dataset.fid;
+        if (collapsedFolders.has(fid)) collapsedFolders.delete(fid);
+        else collapsedFolders.add(fid);
+        localStorage.setItem(COLLAPSE_KEY, JSON.stringify([...collapsedFolders]));
+        renderSidebar(entries);
+      });
+    });
+    el.querySelectorAll('[data-action="rename"]').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); promptRenameFolder(+btn.dataset.fid); });
+    });
+    el.querySelectorAll('[data-action="delete"]').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); confirmDeleteFolder(+btn.dataset.fid); });
+    });
+    el.querySelectorAll('.entry-item').forEach(n => n.addEventListener('click', () => openEntry(+n.dataset.id)));
+  }
+
+  function getExcerpt(text, keywords, ctxLen) {
+    if (!text || !keywords || !keywords.length) return '';
+    const textNorm = norm(text);
+    // Chercher la premiere occurrence du premier keyword
+    let bestIdx = -1;
+    for (const kw of keywords) {
+      const idx = textNorm.indexOf(kw);
+      if (idx !== -1 && (bestIdx === -1 || idx < bestIdx)) bestIdx = idx;
+    }
+    if (bestIdx === -1) return '';
+    // Nettoyer le markdown brut pour l'extrait
+    const clean = text.replace(/[#*`_~>\[\]]/g, '').replace(/\n+/g, ' ').trim();
+    const cleanNorm = norm(clean);
+    // Retrouver la position dans le texte nettoyé
+    let pos = -1;
+    for (const kw of keywords) {
+      const idx = cleanNorm.indexOf(kw);
+      if (idx !== -1 && (pos === -1 || idx < pos)) pos = idx;
+    }
+    if (pos === -1) pos = 0;
+    const start = Math.max(0, pos - ctxLen);
+    const end = Math.min(clean.length, pos + ctxLen);
+    let excerpt = (start > 0 ? '...' : '') + clean.slice(start, end) + (end < clean.length ? '...' : '');
+    // Highlight dans l'extrait
+    return highlightText(excerpt, keywords.join(' '));
+  }
+
+  function entryHtml(e, highlight) {
+    const title = highlight ? highlightText(e.title || 'Sans titre', highlight) : escHtml(e.title || 'Sans titre');
+    const tags = (e.tags || '').split(',').filter(Boolean);
+    // Excerpt : uniquement en mode recherche, et seulement si le match est dans le contenu
+    let excerpt = '';
+    if (highlight) {
+      const keywords = highlight.split(/\s+/).filter(Boolean);
+      const tL = norm(e.title), taL = norm(e.tags);
+      const matchInContent = keywords.some(kw => !tL.includes(kw) && !taL.includes(kw));
+      // Toujours afficher l'excerpt si on cherche, qu'il soit dans title/tags ou content
+      excerpt = getExcerpt(e.content, keywords, 60);
+    }
+    return `<div class="entry-item${e.id === currentId ? ' active' : ''}" data-id="${e.id}">
+      <div class="entry-title">${title}</div>
+      ${tags.length ? `<div class="entry-tags">${tags.map(t=>`<span class="tag">${highlight?highlightText(t,highlight):escHtml(t)}</span>`).join('')}</div>` : ''}
+      ${excerpt ? `<div class="entry-excerpt">${excerpt}</div>` : ''}
+    </div>`;
+  }
+
+  function highlightActive() {
+    document.querySelectorAll('.entry-item').forEach(n => n.classList.toggle('active', +n.dataset.id === currentId));
+  }
+  function highlightText(text, q) {
+    const esc = escHtml(text);
+    const kws = q.split(/\s+/).filter(Boolean).sort((a,b)=>b.length-a.length);
+    let r = esc;
+    for (const kw of kws) r = r.replace(new RegExp(`(${kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<span class="highlight">$1</span>');
+    return r;
+  }
+  function escHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function populateFolderSelect() {
+    const sel = document.getElementById('folder-select');
+    sel.innerHTML = `<option value="">-- Sans dossier --</option>` + folders.map(f=>`<option value="${f.id}">${escHtml(f.name)}</option>`).join('');
+    sel.value = currentFolderId || '';
+  }
+
+  // --- Ouvrir / Nouvelle fiche ---
+  function openEntry(id) {
+    if (!isSaved() && !confirm('Modifications non sauvegardees. Continuer ?')) return;
+    const e = entries.find(x => x.id === id);
+    if (!e) return;
+    currentId = id; currentFolderId = e.folder_id;
+    document.getElementById('entry-title-input').value = e.title;
+    document.getElementById('content-editor').value = e.content;
+    currentTags = (e.tags || '').split(',').filter(Boolean);
+    renderTags();
+    document.getElementById('tags-input').value = '';
+    populateFolderSelect();
+    showEditor(); updatePreview(); setSaveIndicator('saved'); highlightActive();
+  }
+
+  function newEntry() {
+    if (!isSaved() && !confirm('Modifications non sauvegardees. Continuer ?')) return;
+    currentId = null;
+    document.getElementById('entry-title-input').value = '';
+    document.getElementById('content-editor').value = '';
+    currentTags = []; renderTags();
+    document.getElementById('tags-input').value = '';
+    populateFolderSelect();
+    showEditor(); updatePreview(); setSaveIndicator('');
+    document.getElementById('entry-title-input').focus();
+    highlightActive();
+  }
+
+  // --- Modales dossiers ---
+  function promptNewFolder() {
+    showModal('Nouveau dossier', 'Nom du dossier :', '', name => { if (name.trim()) createFolder(name); });
+  }
+  function promptRenameFolder(id) {
+    const f = folders.find(f=>f.id===id); if (!f) return;
+    showModal('Renommer le dossier', '', f.name, name => { if (name) renameFolder(id, name); });
+  }
+  function confirmDeleteFolder(id) {
+    const f = folders.find(f=>f.id===id); if (!f) return;
+    const count = entries.filter(e=>e.folder_id===id).length;
+    showModal('Supprimer le dossier', `Supprimer "${f.name}" ? ${count > 0 ? `Les ${count} fiches seront deplacees dans "Sans dossier".` : 'Ce dossier est vide.'}`, null, null, () => deleteFolder(id));
+  }
+
+  // --- Vue modes ---
+  function setViewMode(mode) {
+    viewMode = mode;
+    const ep = document.getElementById('editor-pane'), pp = document.getElementById('preview-pane');
+    ['btn-mode-edit','btn-mode-split','btn-mode-preview'].forEach(id => document.getElementById(id).classList.remove('active'));
+    if (mode === 'edit') { ep.style.display=''; pp.style.display='none'; document.getElementById('btn-mode-edit').classList.add('active'); }
+    else if (mode === 'split') { ep.style.display=''; pp.style.display=''; document.getElementById('btn-mode-split').classList.add('active'); }
+    else { ep.style.display='none'; pp.style.display=''; document.getElementById('btn-mode-preview').classList.add('active'); }
+  }
+  function updatePreview() {
+    if (viewMode === 'edit') return;
+    const renderer = new marked.Renderer();
+    renderer.link = (href, title, text) => `<a href="${typeof href==='object'?href.href:href}" target="_blank" rel="noopener noreferrer">${typeof href==='object'?href.text:text}</a>`;
+    const pane = document.getElementById('preview-content');
+    pane.innerHTML = marked.parse(document.getElementById('content-editor').value || '', { renderer });
+    // Highlight de la recherche active dans le preview
+    if (activeSearchQuery) {
+      highlightInPreview(pane, activeSearchQuery.split(/\s+/).filter(Boolean));
+    }
+  }
+
+  function highlightInPreview(container, keywords) {
+    // Parcourir uniquement les noeuds texte, sans toucher au HTML
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => {
+        const parent = n.parentNode.tagName;
+        if (['SCRIPT','STYLE','A'].includes(parent)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    for (const node of nodes) {
+      const text = node.textContent;
+      const textNorm = norm(text);
+      let hasMatch = keywords.some(kw => textNorm.includes(kw));
+      if (!hasMatch) continue;
+      // Construire le HTML avec les highlights
+      let result = '';
+      let lastIdx = 0;
+      // Trouver toutes les occurrences de tous les keywords
+      const matches = [];
+      for (const kw of keywords) {
+        let idx = 0;
+        while ((idx = textNorm.indexOf(kw, idx)) !== -1) {
+          matches.push({ start: idx, end: idx + kw.length });
+          idx += kw.length;
+        }
+      }
+      // Trier et fusionner les overlaps
+      matches.sort((a,b) => a.start - b.start);
+      const merged = [];
+      for (const m of matches) {
+        if (merged.length && m.start < merged[merged.length-1].end) {
+          merged[merged.length-1].end = Math.max(merged[merged.length-1].end, m.end);
+        } else { merged.push({...m}); }
+      }
+      for (const m of merged) {
+        result += escHtml(text.slice(lastIdx, m.start));
+        result += `<mark class="preview-hl">${escHtml(text.slice(m.start, m.end))}</mark>`;
+        lastIdx = m.end;
+      }
+      result += escHtml(text.slice(lastIdx));
+      const span = document.createElement('span');
+      span.innerHTML = result;
+      node.parentNode.replaceChild(span, node);
+    }
+    // Scroll vers le premier highlight
+    const first = container.querySelector('.preview-hl');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // --- Tags ---
+  function renderTags() {
+    document.getElementById('tags-display').innerHTML = currentTags.map((t,i) =>
+      `<span class="tag-pill">${escHtml(t)}<button onclick="removeTag(${i})">x</button></span>`).join('');
+  }
+  window.removeTag = i => { currentTags.splice(i,1); renderTags(); markUnsaved(); };
+  document.getElementById('tags-input').addEventListener('keydown', e => {
+    if (e.key==='Enter'||e.key===',') {
+      e.preventDefault();
+      const v = e.target.value.trim().replace(/,/g,'');
+      if (v && !currentTags.includes(v)) { currentTags.push(v); renderTags(); }
+      e.target.value=''; markUnsaved();
+    } else if (e.key==='Backspace' && !e.target.value && currentTags.length) {
+      currentTags.pop(); renderTags(); markUnsaved();
+    }
+  });
+
+  // --- UI ---
+  function showEditor() {
+    document.getElementById('welcome').style.display='none';
+    document.getElementById('editor-wrap').style.display='flex';
+    setViewMode(viewMode);
+  }
+  function showWelcome() {
+    document.getElementById('welcome').style.display='flex';
+    document.getElementById('editor-wrap').style.display='none';
+  }
+  function setStatus(s) {
+    document.getElementById('status-dot').className = s==='saved' ? 'dot' : 'dot warn';
+    document.getElementById('status-text').textContent = s==='saved' ? 'Connecte' : 'Erreur';
+  }
+  function setSaveIndicator(s) {
+    const el = document.getElementById('save-indicator');
+    el.className = s;
+    el.textContent = s==='saved' ? 'Sauvegarde' : s==='unsaved' ? 'Modifications...' : '';
+  }
+  function isSaved() { return document.getElementById('save-indicator').className !== 'unsaved'; }
+  function markUnsaved() { setSaveIndicator('unsaved'); }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = type==='success' ? 'show success' : type==='error' ? 'show error' : 'show';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.className='', 2500);
+  }
+
+  function showModal(title, body, inputDefault, onConfirm, onDanger) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').textContent = body;
+    const inp = document.getElementById('modal-input');
+    if (inputDefault !== null && inputDefault !== undefined) {
+      inp.style.display=''; inp.value = inputDefault || '';
+      setTimeout(() => { inp.focus(); inp.select(); }, 50);
+    } else { inp.style.display='none'; }
+    const ac = document.getElementById('modal-actions');
+    ac.innerHTML='';
+    const cancel = document.createElement('button'); cancel.textContent='Annuler'; cancel.className='btn-secondary';
+    cancel.onclick = () => document.getElementById('modal-overlay').classList.remove('show');
+    ac.appendChild(cancel);
+    if (onConfirm) {
+      const ok = document.createElement('button'); ok.textContent='Valider'; ok.className='btn-primary';
+      ok.onclick = () => { document.getElementById('modal-overlay').classList.remove('show'); onConfirm(inp.value); };
+      ac.appendChild(ok);
+      inp.onkeydown = e => { if (e.key==='Enter') ok.click(); };
+    }
+    if (onDanger) {
+      const del = document.createElement('button'); del.textContent='Supprimer'; del.className='btn-danger';
+      del.onclick = () => { document.getElementById('modal-overlay').classList.remove('show'); onDanger(); };
+      ac.appendChild(del);
+    }
+    document.getElementById('modal-overlay').classList.add('show');
+  }
+  document.getElementById('modal-overlay').addEventListener('click', e => {
+    if (e.target===document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('show');
+  });
+
+  // --- Evenements ---
+  document.getElementById('btn-new').addEventListener('click', newEntry);
+  document.getElementById('btn-new-folder').addEventListener('click', promptNewFolder);
+  document.getElementById('btn-save').addEventListener('click', saveEntry);
+  document.getElementById('btn-mode-edit').addEventListener('click', () => setViewMode('edit'));
+  document.getElementById('btn-mode-split').addEventListener('click', () => setViewMode('split'));
+  document.getElementById('btn-mode-preview').addEventListener('click', () => { setViewMode('preview'); updatePreview(); });
+  document.getElementById('content-editor').addEventListener('input', () => {
+    markUnsaved(); clearTimeout(saveTimer); saveTimer = setTimeout(updatePreview, 300);
+  });
+  document.getElementById('entry-title-input').addEventListener('input', markUnsaved);
+  document.getElementById('folder-select').addEventListener('change', e => {
+    currentFolderId = e.target.value ? +e.target.value : null; markUnsaved();
+  });
+  document.getElementById('btn-delete').addEventListener('click', () => {
+    if (!currentId) return;
+    const title = document.getElementById('entry-title-input').value || 'cette fiche';
+    showModal('Supprimer la fiche', `Supprimer "${title}" ? Cette action est irreversible.`, null, null, () => deleteEntry(currentId));
+  });
+  let searchDebounce;
+  document.getElementById('search').addEventListener('input', e => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => doSearch(e.target.value), 100);
+  });
+  document.getElementById('search').addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const first = document.querySelector('#entry-list .entry-item');
+    if (first) { first.click(); document.getElementById('search').blur(); }
+  });
+  // Navigation clavier sidebar
+  let kbdIdx = -1;
+  function getVisibleItems() {
+    return [...document.querySelectorAll('#entry-list .entry-item')];
+  }
+  function setKbdFocus(idx) {
+    const items = getVisibleItems();
+    if (!items.length) return;
+    // Retirer l'ancien focus
+    items.forEach(el => el.classList.remove('kbd-focus'));
+    kbdIdx = Math.max(0, Math.min(idx, items.length - 1));
+    const target = items[kbdIdx];
+    target.classList.add('kbd-focus');
+    target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+  function clearKbdFocus() {
+    document.querySelectorAll('.kbd-focus').forEach(el => el.classList.remove('kbd-focus'));
+    kbdIdx = -1;
+  }
+  // Reinitialiser le focus clavier apres chaque render
+  const _origRenderSidebar = renderSidebar;
+  // (patch inline - on accroche sur loadAll et doSearch)
+  const _origLoadAll = loadAll;
+
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey||e.metaKey)&&e.key==='s') { e.preventDefault(); if (document.getElementById('editor-wrap').style.display!=='none') saveEntry(); }
+    if ((e.ctrlKey||e.metaKey)&&e.key==='n') { e.preventDefault(); newEntry(); }
+    if (e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) { e.preventDefault(); document.getElementById('search').focus(); }
+    if (e.key==='Escape') {
+      document.getElementById('search').blur();
+      document.getElementById('modal-overlay').classList.remove('show');
+      closeMdModal();
+      clearKbdFocus();
+    }
+    // Navigation haut/bas uniquement si focus hors input/textarea
+    const tag = document.activeElement.tagName;
+    if (['INPUT','TEXTAREA','SELECT'].includes(tag)) return;
+    if (e.key==='ArrowDown') {
+      e.preventDefault();
+      const items = getVisibleItems();
+      if (!items.length) return;
+      setKbdFocus(kbdIdx < 0 ? 0 : kbdIdx + 1);
+    }
+    if (e.key==='ArrowUp') {
+      e.preventDefault();
+      const items = getVisibleItems();
+      if (!items.length) return;
+      setKbdFocus(kbdIdx <= 0 ? 0 : kbdIdx - 1);
+    }
+    if (e.key==='Enter' && kbdIdx >= 0) {
+      e.preventDefault();
+      const items = getVisibleItems();
+      if (items[kbdIdx]) items[kbdIdx].click();
+    }
+  });
+  // Reinitialiser kbdIdx quand la sidebar change (recherche, loadAll)
+  document.getElementById('search').addEventListener('input', () => { kbdIdx = -1; });
+
+
+  // --- Modale Markdown ---
+  const MD_SECTIONS = [
+    { title: 'Titres', rows: [
+      { code: '# Titre 1',          render: '<h1>Titre 1</h1>' },
+      { code: '## Titre 2',         render: '<h2>Titre 2</h2>' },
+      { code: '### Titre 3',        render: '<h3>Titre 3</h3>' },
+    ]},
+    { title: 'Mise en forme', rows: [
+      { code: '**gras**',           render: '<strong>gras</strong>' },
+      { code: '_italique_',         render: '<em>italique</em>' },
+      { code: '~~barre~~',          render: '<del>barre</del>' },
+      { code: '**_gras italique_**',render: '<strong><em>gras italique</em></strong>' },
+    ]},
+    { title: 'Listes', rows: [
+      { code: '- element\n- autre', render: '<ul><li>element</li><li>autre</li></ul>' },
+      { code: '1. premier\n2. second', render: '<ol><li>premier</li><li>second</li></ol>' },
+      { code: '- [ ] a faire\n- [x] fait', render: '<ul><li>☐ a faire</li><li>☑ fait</li></ul>' },
+    ]},
+    { title: 'Liens & Images', rows: [
+      { code: '[texte](https://url.com)',         render: '<a href="#">texte</a>' },
+      { code: '[texte](https://url.com "titre")', render: '<a href="#" title="titre">texte</a>' },
+      { code: '![alt](https://url.com/img.png)',  render: '<em>[ image : alt ]</em>' },
+    ]},
+    { title: 'Code', rows: [
+      { code: '`code inline`',                       render: '<code>code inline</code>' },
+      { code: '```\nbloc de code\n```',              render: '<pre>bloc de code</pre>' },
+      { code: '```python\nprint("hello")\n```',      render: '<pre>print("hello")</pre>' },
+    ]},
+    { title: 'Citations & separateurs', rows: [
+      { code: '> citation\n> multiligne',  render: '<blockquote>citation multiligne</blockquote>' },
+      { code: '---',                        render: '<hr style="border-top:1px solid var(--border);margin:4px 0">' },
+    ]},
+    { title: 'Tableaux', rows: [
+      { code: '| Col A | Col B |\n|-------|-------|\n| val 1 | val 2 |', render: '<table><tr><th>Col A</th><th>Col B</th></tr><tr><td>val 1</td><td>val 2</td></tr></table>' },
+      { code: '| Gauche | Centre | Droite |\n|:-------|:------:|-------:|\n| g      |   c    |      d |', render: '<table><tr><th>Gauche</th><th>Centre</th><th>Droite</th></tr><tr><td>g</td><td>c</td><td>d</td></tr></table>' },
+    ]},
+    { title: 'Divers', rows: [
+      { code: 'ligne 1  \nligne 2',          render: 'ligne 1<br>ligne 2 <em>(2 espaces = saut de ligne)</em>' },
+      { code: '\\*echapper\\*',               render: '*echapper* <em>(antislash)</em>' },
+      { code: '- item\n  - sous-item',        render: '<ul><li>item<ul><li>sous-item</li></ul></li></ul>' },
+    ]},
+  ];
+
+  function buildMdModal() {
+    const body = document.getElementById('md-modal-body');
+    body.innerHTML = MD_SECTIONS.map(s => `
+      <div class="md-section">
+        <div class="md-section-title">${s.title}</div>
+        ${s.rows.map(r => `
+          <div class="md-row">
+            <div>
+              <div class="md-label">Markdown</div>
+              <div class="md-code" data-copy="${r.code.replace(/"/g,'&quot;')}">${r.code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}</div>
+            </div>
+            <div>
+              <div class="md-label">Rendu</div>
+              <div class="md-render">${r.render}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+    // Copier au clic
+    body.querySelectorAll('.md-code').forEach(el => {
+      el.addEventListener('click', () => {
+        const text = el.dataset.copy;
+        navigator.clipboard.writeText(text).then(() => {
+          el.classList.add('copied');
+          setTimeout(() => el.classList.remove('copied'), 1500);
+        });
+      });
+    });
+  }
+
+  function openMdModal() {
+    buildMdModal();
+    document.getElementById('md-modal-overlay').style.display = 'flex';
+  }
+  function closeMdModal() {
+    document.getElementById('md-modal-overlay').style.display = 'none';
+  }
+  document.getElementById('btn-md-help').addEventListener('click', openMdModal);
+  document.getElementById('md-modal-close').addEventListener('click', closeMdModal);
+  document.getElementById('md-modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('md-modal-overlay')) closeMdModal();
+  });
+
+  // --- Theme switch ---
+  const THEME_KEY = 'wiki_theme';
+  const DARK_THEMES = ['obsidian', 'midnight', 'forest', 'mocha'];
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('theme-select').value = theme;
+  }
+  document.getElementById('theme-select').addEventListener('change', e => {
+    const t = e.target.value;
+    localStorage.setItem(THEME_KEY, t);
+    applyTheme(t);
+  });
+  applyTheme(localStorage.getItem(THEME_KEY) || 'arctic');
+
+  // --- Autosave toutes les 30 secondes ---
+  setInterval(async () => {
+    if (document.getElementById('save-indicator').className === 'unsaved') {
+      await saveEntry();
+    }
+  }, 30 * 1000);
+
+  // --- Tri sidebar ---
+  document.getElementById('sort-select').value = currentSort;
+  document.getElementById('sort-select').addEventListener('change', e => {
+    currentSort = e.target.value;
+    localStorage.setItem(SORT_KEY, currentSort);
+    entries = sortEntries(entries);
+    const q = document.getElementById('search').value;
+    if (q) doSearch(q); else renderSidebar(entries);
+  });
+
+  setViewMode('split');
+
+  // ================================================================
+  // Boot : detection du mode, init, chargement
+  // ================================================================
+  MODE = await detectMode();
+
+  // Badge mode + logo
+  const modeLabel = MODE === 'server' ? 'Serveur' : 'Local';
+  document.getElementById('status-text').textContent = modeLabel;
+  document.querySelector('.logo').innerHTML = MODE === 'server'
+    ? 'wiki<span>.</span>srv'
+    : 'wiki<span>.</span>local';
+
+  if (MODE === 'server') {
+    // Bouton logout visible
+    document.getElementById('btn-logout').style.display = '';
+    // Verifier si on est deja loggue
+    const logged = await checkLogin();
+    if (!logged) {
+      showLoginScreen();
+      return; // On s'arrete ici, la suite sera executee apres login
+    }
+  }
+
+  if (MODE === 'local') {
+    // Afficher les boutons export/import
+    document.getElementById('btn-export').style.display = '';
+    document.getElementById('btn-import-label').style.display = '';
+
+    // Charger sql.js et la base locale
+    try {
+      SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${f}` });
+    } catch(e) {
+      showToast('Erreur chargement SQLite', 'error'); return;
+    }
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const bin = atob(saved); const arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        localInitDb(arr);
+      } catch(e) { localInitDb(null); }
+    } else {
+      localInitDb(null);
+    }
+
+    // Export
+    let autoFileHandle = null;
+    async function exportDb(silent) {
+      const data = db.export();
+      const blob = new Blob([data], { type: 'application/octet-stream' });
+      const filename = 'wiki-local-' + new Date().toISOString().slice(0,10) + '.db';
+      if (window.showSaveFilePicker && !silent) {
+        try {
+          autoFileHandle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{ description: 'SQLite database', accept: { 'application/octet-stream': ['.db'] } }]
+          });
+        } catch(e) { return false; }
+      }
+      if (autoFileHandle) {
+        try {
+          const w = await autoFileHandle.createWritable();
+          await w.write(blob); await w.close(); return true;
+        } catch(e) { autoFileHandle = null; }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url); return true;
+    }
+    document.getElementById('btn-export').addEventListener('click', async () => {
+      const ok = await exportDb(false);
+      if (ok) showToast('Base exportee' + (autoFileHandle ? ' - autosave actif' : ''), 'success');
+    });
+
+    // Import
+    document.getElementById('btn-import').addEventListener('change', e => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        showModal('Importer une base', 'Cette operation remplacera toutes les fiches actuelles. Continuer ?', null, null, async () => {
+          localInitDb(new Uint8Array(ev.target.result));
+          currentId = null; showWelcome(); await loadAll();
+          showToast('Base importee', 'success');
+        });
+        e.target.value = '';
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    // Autosave fichier toutes les 10 min
+    setInterval(async () => {
+      if (autoFileHandle) await exportDb(true);
+    }, 10 * 60 * 1000);
+
+    showToast('Mode local (pas de backend PHP detecte)', null);
+  } else {
+    showToast('Mode serveur connecte', 'success');
+  }
+
+  await loadAll();
+})();
+</script>
+</body>
+</html>
