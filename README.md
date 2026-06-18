@@ -18,9 +18,8 @@ Zéro installation, zéro dépendance locale. Un seul fichier HTML à ouvrir ou 
 * **Tags** - ajout rapide par `Entrée` ou `,`, recherche sur les tags
 * **Tri sidebar** - alphabétique (défaut) ou par date de modification
 * **Aide Markdown** - modale scrollable avec toutes les syntaxes supportées, copie en un clic
-* **Auth par cookie** (mode serveur) - login simple, cookie 30 jours, pas besoin de credentials dans l'URL
+* **Auth par cookie** (mode serveur) - login simple
 * **Export / Import `.db`** (mode local) - fichier SQLite standard, avec autosave optionnel vers un fichier local via File System Access API
-* **Liens en `target="\_blank`** - tous les liens du preview s'ouvrent dans un nouvel onglet
 
 \---
 
@@ -45,10 +44,10 @@ Déposer `index.html` et `api.php` dans le même dossier sur un serveur PHP. La 
 Configurer les credentials dans `api.php` :
 
 ```php
-define('AUTH\_USER',     'admin');
-define('AUTH\_PASS',     'motdepasse');
-define('COOKIE\_DAYS',   30);
-define('COOKIE\_SECRET', 'une\_chaine\_aleatoire\_longue');
+define('AUTH_USER',     'admin');
+define('AUTH_PASS',     'motdepasse');
+define('COOKIE_DAYS',   30);
+define('COOKIE_SECRET', 'une_chaine_aleatoire_longue');
 ```
 
 Décommenter `'secure' => true` dans `api.php` si le serveur est en HTTPS (recommandé).
