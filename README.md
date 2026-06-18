@@ -4,7 +4,6 @@ Un wiki personnel ultra-rapide en fichier HTML unique. Conçu pour remplacer les
 
 Zéro installation, zéro dépendance locale. Un seul fichier HTML à ouvrir ou déposer sur un serveur PHP.
 
-\---
 
 ## Fonctionnalités
 
@@ -21,7 +20,7 @@ Zéro installation, zéro dépendance locale. Un seul fichier HTML à ouvrir ou 
 * **Auth par cookie** (mode serveur) - login simple
 * **Export / Import `.db`** (mode local) - fichier SQLite standard, avec autosave optionnel vers un fichier local via File System Access API
 
-\---
+
 
 ## Utilisation
 
@@ -56,7 +55,6 @@ Décommenter `'secure' => true` dans `api.php` si le serveur est en HTTPS (recom
 
 Exporter le `.db` depuis le wiki local, le déposer sur le serveur sous le nom `wiki.db`. La structure des tables est identique, la migration est immédiate.
 
-\---
 
 ## Stack technique
 
@@ -66,7 +64,7 @@ Exporter le `.db` depuis le wiki local, le déposer sur le serveur sous le nom `
 * [Inter](https://rsms.me/inter/) + [JetBrains Mono](https://www.jetbrains.com/legalnotices/terms_of_use_jb_mono/) via Google Fonts
 * PHP 7.4+ + extension PDO SQLite pour le mode serveur
 
-\---
+
 
 ## Raccourcis clavier
 
