@@ -12,7 +12,7 @@ Zéro installation, zéro dépendance locale. Un seul fichier HTML à ouvrir ou 
 * **Recherche instantanée** - full-text en JS pur sur titre, contenu et tags, insensible à la casse et aux accents, avec excerpt et highlighting des résultats dans la sidebar et dans le preview
 * **Éditeur Markdown** - vue éditeur / split / preview, avec rendu en temps réel côté preview
 * **6 thèmes** - Obsidian, Midnight, Forest, Mocha, Linen, Arctic — sélecteur dans la topbar, choix mémorisé
-* **Navigation clavier** - `↑` `↓` pour naviguer dans la sidebar, `Entrée` pour ouvrir, `/` pour la recherche, `Ctrl+S` pour sauvegarder, `Ctrl+N` pour une nouvelle fiche
+* **Navigation clavier** - `↑` `↓` pour naviguer dans la sidebar, `Entrée` pour ouvrir, `/` pour la recherche, `Ctrl+S` pour sauvegarder
 * **Autosave** - sauvegarde automatique toutes les 30 secondes si des modifications sont en attente
 * **Tags** - ajout rapide par `Entrée` ou `,`, recherche sur les tags
 * **Tri sidebar** - alphabétique (défaut) ou par date de modification
