@@ -332,6 +332,8 @@
     </select>
     <button id="btn-md-help" title="Aide Markdown" style="background:transparent;border:1px solid var(--border);color:var(--text2);padding:0 11px;height:32px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px;transition:all 0.15s;white-space:nowrap;font-family:var(--sans);">&#10003; Aide MD</button>
     <button class="topbar-btn ghost" id="btn-export" style="display:none">Exporter .db</button>
+    <button class="topbar-btn ghost" id="btn-resume-autosave" style="display:none" title="Reautoriser l'ecriture vers le fichier .db lie">&#8635; Reprendre autosave</button>
+    <span id="autosave-status" style="display:none" title="Chaque modification est ecrite dans le fichier .db lie">&#128190; fichier lie</span>
     <label class="topbar-btn ghost" id="btn-import-label" style="display:none;cursor:pointer">
       Importer .db
       <input type="file" id="btn-import" accept=".db" style="display:none">
@@ -542,6 +544,8 @@
   // ================================================================
   // MODE LOCAL - couche SQLite WASM
   // ================================================================
+  let scheduleFileSave = null; // defini en mode local si un fichier .db est lie
+
   function localSaveToStorage() {
     try {
       const data = db.export();
@@ -549,6 +553,7 @@
       localStorage.setItem(STORAGE_KEY, b64);
       setStatus('saved');
     } catch(e) { setStatus('warn'); }
+    if (scheduleFileSave) scheduleFileSave();
   }
 
   function localInitDb(data) {
@@ -1284,8 +1289,112 @@
       localInitDb(null);
     }
 
-    // Export
+    // ------------------------------------------------------------
+    // Autosave fichier : handle persistant (IndexedDB) + ecriture
+    // debouncee a chaque modification + flush a la fermeture
+    // ------------------------------------------------------------
+    const HANDLE_KEY = 'wiki_file_handle';
+    function idbOpen() {
+      return new Promise((res, rej) => {
+        const r = indexedDB.open('wiki_fs', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('kv');
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      });
+    }
+    async function idbSet(k, v) {
+      const d = await idbOpen();
+      return new Promise((res, rej) => {
+        const t = d.transaction('kv', 'readwrite');
+        t.objectStore('kv').put(v, k);
+        t.oncomplete = () => res();
+        t.onerror = () => rej(t.error);
+      });
+    }
+    async function idbGet(k) {
+      const d = await idbOpen();
+      return new Promise((res, rej) => {
+        const q = d.transaction('kv', 'readonly').objectStore('kv').get(k);
+        q.onsuccess = () => res(q.result);
+        q.onerror = () => rej(q.error);
+      });
+    }
+
     let autoFileHandle = null;
+    let pendingHandle  = null; // handle restaure mais permission a redemander
+    let fileSaveTimer  = null;
+    let fileWriting    = false;
+
+    function updateFileBadge() {
+      document.getElementById('autosave-status').style.display = autoFileHandle ? '' : 'none';
+      document.getElementById('btn-resume-autosave').style.display = pendingHandle ? '' : 'none';
+    }
+
+    async function writeDbToFile() {
+      if (!autoFileHandle || fileWriting) return false;
+      fileWriting = true;
+      try {
+        const w = await autoFileHandle.createWritable();
+        await w.write(new Blob([db.export()], { type: 'application/octet-stream' }));
+        await w.close();
+        return true;
+      } catch(e) {
+        // Handle devenu invalide (fichier deplace/supprime) : on desactive
+        autoFileHandle = null;
+        updateFileBadge();
+        showToast('Ecriture fichier .db impossible - autosave desactive', 'error');
+        return false;
+      } finally {
+        fileWriting = false;
+      }
+    }
+
+    // Ecriture debouncee : appelee via localSaveToStorage a chaque modification
+    scheduleFileSave = () => {
+      if (!autoFileHandle) return;
+      clearTimeout(fileSaveTimer);
+      fileSaveTimer = setTimeout(writeDbToFile, 2000);
+    };
+
+    // Flush immediat quand l'onglet passe en arriere-plan ou se ferme
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && autoFileHandle) {
+        clearTimeout(fileSaveTimer);
+        writeDbToFile();
+      }
+    });
+
+    // Restauration du handle d'une session precedente
+    try {
+      const h = await idbGet(HANDLE_KEY);
+      if (h && h.queryPermission) {
+        const perm = await h.queryPermission({ mode: 'readwrite' });
+        if (perm === 'granted') {
+          autoFileHandle = h;
+        } else if (perm === 'prompt') {
+          pendingHandle = h; // il faut un geste utilisateur pour redemander
+        }
+      }
+    } catch(e) {}
+    updateFileBadge();
+
+    document.getElementById('btn-resume-autosave').addEventListener('click', async () => {
+      if (!pendingHandle) return;
+      try {
+        const perm = await pendingHandle.requestPermission({ mode: 'readwrite' });
+        if (perm === 'granted') {
+          autoFileHandle = pendingHandle;
+          pendingHandle = null;
+          updateFileBadge();
+          await writeDbToFile();
+          showToast('Autosave fichier reactive', 'success');
+          return;
+        }
+      } catch(e) {}
+      showToast('Permission refusee', 'error');
+    });
+
+    // Export : lie le fichier choisi et active l'autosave dessus
     async function exportDb(silent) {
       const data = db.export();
       const blob = new Blob([data], { type: 'application/octet-stream' });
@@ -1296,13 +1405,16 @@
             suggestedName: filename,
             types: [{ description: 'SQLite database', accept: { 'application/octet-stream': ['.db'] } }]
           });
+          pendingHandle = null;
+          try { await idbSet(HANDLE_KEY, autoFileHandle); } catch(e) {}
+          updateFileBadge();
         } catch(e) { return false; }
       }
       if (autoFileHandle) {
         try {
           const w = await autoFileHandle.createWritable();
           await w.write(blob); await w.close(); return true;
-        } catch(e) { autoFileHandle = null; }
+        } catch(e) { autoFileHandle = null; updateFileBadge(); }
       }
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
@@ -1310,7 +1422,7 @@
     }
     document.getElementById('btn-export').addEventListener('click', async () => {
       const ok = await exportDb(false);
-      if (ok) showToast('Base exportee' + (autoFileHandle ? ' - autosave actif' : ''), 'success');
+      if (ok) showToast('Base exportee' + (autoFileHandle ? ' - autosave fichier actif' : ''), 'success');
     });
 
     // Import
@@ -1328,10 +1440,10 @@
       reader.readAsArrayBuffer(file);
     });
 
-    // Autosave fichier toutes les 10 min
+    // Filet de securite : ecriture periodique meme sans modification recente
     setInterval(async () => {
-      if (autoFileHandle) await exportDb(true);
-    }, 10 * 60 * 1000);
+      if (autoFileHandle) await writeDbToFile();
+    }, 5 * 60 * 1000);
 
     showToast('Mode local (pas de backend PHP detecte)', null);
   } else {
